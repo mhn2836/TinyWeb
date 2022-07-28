@@ -19,6 +19,8 @@
 #include<sys/socket.h>
 #include<sys/wait.h>
 #include<netinet/in.h>
+#include<signal.h>
+#include<sys/epoll.h>
 
 class util_timer;
 const int buf_size = 64;
@@ -45,7 +47,9 @@ public:
 
 class heap_timer{
 public:
+    heap_timer();
     heap_timer(int cap);
+    heap_timer(int cap, int size, std::vector<util_timer*> timer);
     ~heap_timer();
 
 private:
@@ -59,7 +63,48 @@ public:
     void add_timer(util_timer *timer);
     void del_timer(util_timer *timer);
     void update_timer();
+    void pop_timer();
+
+    void heap_adjust(int begin);
+    util_timer *top();
+    bool empty();
+
+    void resize();
+    void tick();
 };
 
+class util{
+public:
+    util(){
+    }
+
+    ~util(){
+
+    }
+
+    void init(int timeslot);
+
+    int set_non_blocking(int fd);
+
+    void add_fd(int efd, int fd, bool one_shot);
+
+    static void sig_handler(int sig);
+
+    void add_sig(int sig, void(handler)(int), bool restart = true);
+
+    void timer_handler();
+
+    void show_error(int cfd, const char *info);
+public:
+    static int *_pipefd;
+    heap_timer _heap_timer;
+    static int _efd;
+    int _timeslot;
+};
+
+int *util::_pipefd = 0;
+int util::_efd = 0;
+
+void cb_func(data);
 
 #endif
