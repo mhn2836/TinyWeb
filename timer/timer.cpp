@@ -190,5 +190,4 @@ void cb_func(data *user_data){
     epoll_ctl(util::_efd, EPOLL_CTL_DEL, user_data->sockfd, 0);
     assert(user_data);
     close(user_data->sockfd);
-    //http_conn::_user_count--;
-}
+    http_conn::m_user_count--;

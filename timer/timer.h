@@ -22,6 +22,9 @@
 #include<signal.h>
 #include<sys/epoll.h>
 
+#include "../log/log.h"
+#include "../http_conn/http_conn.h"
+
 class util_timer;
 const int buf_size = 64;
 
