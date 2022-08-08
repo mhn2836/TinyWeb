@@ -1,7 +1,7 @@
 #include "timer.h"
 
 //util_timer
-util_timer::util_timer(int delay):_expire(delay){
+util_timer::util_timer(int delay):_expire(time(NULL) + delay){
 
 }
 
@@ -19,7 +19,7 @@ heap_timer::heap_timer(int capacity):_capacity(capacity), _cur_size(0){
     if(_heap.empty()) throw std::exception();
 
     for(int i = 0;i < _capacity; i++){
-        _heap[i] = 0;
+        _heap[i].emplace_back(nullptr);
     }
 }   
 
@@ -27,7 +27,9 @@ heap_timer::heap_timer(int cap, int size, std::vector<util_timer*> timer):_cur_s
     if(_capacity < _cur_size) throw std::exception();
 
     _heap.reserve(_capacity);
-    for(int i = 0;i < _capacity; i++){_heap[i] = nullptr;}
+    for(int i = 0;i < _capacity; i++){
+        _heap[i].emplace_back(nullptr);
+    }
 
     if(_cur_size){
         for(int i = 0;i < _cur_size; i++) _heap[i] = timer[i];
@@ -40,6 +42,10 @@ heap_timer::heap_timer(int cap, int size, std::vector<util_timer*> timer):_cur_s
 }
 
 heap_timer::~heap_timer(){
+    for(int i = 0; i < _cur_size; i++){
+        delete _heap[i];
+    }
+
     _heap.clear();
 }
 
@@ -73,7 +79,7 @@ void heap_timer::pop_timer(){
     if(!_cur_size){
         if(_heap[0]){
             delete _heap[0];
-            _heap[0] = _heap[_cur_size - 1];
+            _heap[0] = _heap[--_cur_size];
             //更新小顶堆
             heap_adjust(0);
         }
@@ -108,6 +114,12 @@ bool heap_timer::empty(){
 
 void heap_timer::resize(){
     _heap.reserve(2 * _capacity);
+
+    for(int i = 0;i < _capacity; i++){
+        _heap.emplace_back(nullptr);
+    }
+
+    _capacity = 2 * _capacity;
 }
 
 void heap_timer::tick(){
@@ -125,7 +137,7 @@ void heap_timer::tick(){
     }
 }
 
-//uitl
+//util
 void util::init(int timeslot){
     _timeslot = timeslot;
 }

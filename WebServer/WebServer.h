@@ -15,6 +15,7 @@
 #include<cassert>
 
 #include "../http_conn/http_conn.h"
+#include "../thread_pool/thread_pool.h"
 
 
 const int MAX_FD = 65536;
@@ -30,17 +31,11 @@ public:
     );
     ~WebServer();
 
-private:
-    int _port;
-    int _logwrite;
-    int _optlinger;
-    int _triggermode;
-    int _sqlnum;
-    int _threadnum;
-    int _closelog;
-    int _actormodel; 
-
 public:
+    void init(int port, std::string user, std::string passwd, std::string dbname, int log_write,
+        int sql_num, int thread_num, int close_log
+    );
+
     //写日志
     void log_write();
     //初始化socket连接
@@ -53,10 +48,50 @@ public:
     void thread_pool();
     //epoll-event
     void epoll_ev();
+
+    //timer相关
+    void timer(int cfd, struct sockaddr_in client_address);
+
+    void deal_timer();
+
+    bool deal_clinet_data();
+
+    bool deal_with_signal();
+
+    void deal_with_read();
+
+    void deal_with_write();
     
 private:
     char *_root;
-    http_conn *users;
+    int _port;
+    int _log_write;
+    int _close_log;
+    int _actormodel;
+
+    int _pipe[2];
+    int _efd;
+    http_conn *_users;
+
+    sql_pool *_sql_pool;
+    std::string _user;
+    std::string _password;
+    std::string _dbname;
+    int _sql_num;
+
+    thread_pool<http_conn> *_pool;
+    int _thread_num;
+
+    epoll_event _events[MAX_EVENT_NUM];
+
+    int _listenfd;
+    int _OPT_LINGER;
+    int _trig_mode;
+    int _listen_mode;
+    int _conn_mode;
+
+    data _user_timer;
+    util _utils;
 
 
 };
