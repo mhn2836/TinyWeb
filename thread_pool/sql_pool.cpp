@@ -12,20 +12,27 @@ int port, int max_conn, int close_log){
 
     for(int i = 0; i < max_conn; i++){
         MYSQL *conn = NULL;
-        conn = mysql_init(conn);
+        MYSQL *ret = NULL;
+        ret = mysql_init(conn);
 
-        if(!conn){
-            LOG_ERROR("mysql error");
+        if(!ret){
+            LOG_ERROR("MySQL Error: mysql_init() returns NULL");
             exit(1);
         }
+        else conn = ret;
 
-        conn = mysql_real_connect(conn, url.c_str(), user.c_str(), password.c_str(), 
+        ret = mysql_real_connect(conn, url.c_str(), user.c_str(), password.c_str(), 
         dbname.c_str(), port, NULL, 0);
 
-        if(!conn){
-            LOG_ERROR("mysql error");
-            exit(1);
+        if(!ret){
+            std::string err_info( mysql_error(conn) );
+			err_info = (std::string("MySQL Error[errno=")
+				+ std::to_string(mysql_errno(conn)) + std::string("]: ") + err_info);
+			LOG_ERROR( err_info.c_str() );
+			exit(1);
         }
+        else conn = ret;
+
         _conn_list.push_back(conn);
         _free_conn++;
     }

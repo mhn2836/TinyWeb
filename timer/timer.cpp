@@ -76,7 +76,7 @@ void heap_timer::del_timer(util_timer *timer){
 }
 
 void heap_timer::pop_timer(){
-    if(!_cur_size){
+    if(_cur_size){
         if(_heap[0]){
             delete _heap[0];
             _heap[0] = _heap[--_cur_size];
@@ -91,11 +91,14 @@ void heap_timer::heap_adjust(int begin){
     int son = father * 2 + 1;
 
     while(son < _cur_size){
-        if(son + 1 < _cur_size && _heap[son] > _heap[son + 1])
+        if(son + 1 < _cur_size && _heap[son]->_expire > _heap[son + 1]->_expire)
         son++;
 
-        if(_heap[son] < _heap[father]){
-            std::swap(_heap[son], _heap[father]);
+        if(_heap[son]->_expire < _heap[father]->expire){
+            util_timer* temp = _heap[father];
+            _heap[father] = _heap[son];
+            _heap[son] = temp;
+
             father = son;
             son = father * 2 + 1;
         }

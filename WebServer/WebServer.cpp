@@ -126,7 +126,7 @@ void WebServer::init_socket(){
 
 void WebServer::timer(int cfd, struct sockaddr_in client_addr){
     util::_efd = _efd;
-    _user_timer[cfd].init(cfd, client_addr, _root, _conn_mode, _close_log, 
+    _users[cfd].init(cfd, client_addr, _root, _conn_mode, _close_log, 
         _user, _passwd, _dbname);
 
     _user_timer[cfd].addr = client_addr;
