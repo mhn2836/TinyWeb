@@ -52,15 +52,17 @@ public:
     //timer相关
     void timer(int cfd, struct sockaddr_in client_address);
 
-    void deal_timer();
+    void adjust_timer(util_timer *timer);
+
+    void deal_timer(util_timer *timer, int sockfd);
 
     bool deal_clinet_data();
 
-    bool deal_with_signal();
+    bool deal_with_signal(bool &timeout, bool &stop_server);
 
-    void deal_with_read();
+    void deal_with_read(int sockfd);
 
-    void deal_with_write();
+    void deal_with_write(int sockfd);
     
 private:
     char *_root;
@@ -90,7 +92,7 @@ private:
     int _listen_mode;
     int _conn_mode;
 
-    data _user_timer;
+    data *_user_timer;
     util _utils;
 
 

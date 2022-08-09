@@ -39,7 +39,7 @@ void WebServer::init(int port, std::string user, std::string passwd, std::string
     _sql_num = sql_num;
     _thread_num = thread_num;
     _close_log = close_log;
-    _actor_model = 0;
+    //_actor_model = 0;
 }
 
 void WebServer::log_write(){
@@ -137,4 +137,146 @@ void WebServer::timer(int cfd, struct sockaddr_in client_addr){
     timer->cb_func = cb_func;
     _user_timer[cfd].timer = timer;
     _utils._heap_timer.add_timer(timer);
+}
+
+void WebServer::adjust_timer(util_timer *timer){
+    timer->expire = time(NULL) + TIMESLOT;
+    _utils._heap_timer.add_timer(timer);
+
+    LOG_INFO("%s", "adjust timer once");
+}
+
+void WebServer::deal_timer(util_timer *timer, int sockfd){
+    timer->cb_func(&users_timer[sockfd]);
+    if(timer){
+        _utils._heap_timer.del_timer(timer);
+    }
+
+    LOG_INFO("close fd %d", _user_timer[sockfd].sockfd);
+}
+
+bool WebServer::deal_clinet_data(){
+    struct sockaddr_in client_addr;
+    socklen_t client_addrlen = sizeof(client_addr);
+
+    if(!_listen_mode){
+        int cfd = accept(_listenfd, (struct sockaddr *)&client_addr, &client_addrlen);
+        if(cfd < 0){
+            LOG_ERROR("%s:errno is %d", "accept error", errno);
+            return false;
+        }
+        if(http_conn::m_user_count >= MAX_FD){
+            _utils.show_error(cfd, "internal server busy");
+            LOG_ERROR("%s", "internal server busy");
+            return false;
+        }
+        timer(cfd, client_addr);
+    }
+    else {
+        while(1){
+            int cfd = accept(_listenfd, (struct sockaddr *)&client_addr, &client_addrlen);
+            if(cfd < 0){
+            LOG_ERROR("%s:errno is %d", "accept error", errno);
+            break;
+        }
+            if(http_conn::m_user_count >= MAX_FD){
+            _utils.show_error(cfd, "internal server busy");
+            LOG_ERROR("%s", "internal server busy");
+            break;
+        }
+            timer(cfd, client_addr);
+        }
+        return false;
+    }
+
+    return true;
+}
+
+bool WebServer::deal_with_signal(bool &timeout, bool &stop_server){
+    int ret = 0;
+    int sig;
+    char signals[1024];
+    ret = recv(_pipe[0], signals, sizeof(signals), 0);
+
+    if(ret = -1) return false;
+    else if(!ret) return false;
+    else {
+        for(int i = 0; i < ret; i++){
+            switch (signals[i])
+            {
+            case SIGALRM:{
+                timeout = true;;break;
+            }
+            case SIGTERM:{
+                stop_server = true;;break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+
+    return true;
+}
+
+void WebServer::deal_with_read(int sockfd){
+    util_timer *timer = _user_timer[sockfd].timer;
+    //proactor
+    if(_users[sockfd].read_once()){
+        LOG_INFO("deal with the client(%s)", inet_ntoa(_users[sockfd].get_address()->sin_addr));
+        _pool->append(_users + sockfd);
+
+        if(timer) adjust_timer(timer);
+        else deal_timer(timer, sockfd);
+    }
+
+}
+
+void WebServer::deal_with_write(int sockfd){
+    util_timer *timer = _user_timer[sockfd].timer;
+    //proactor
+    if(_users[sockfd].write()){
+        LOG_INFO("send data to client(%s)", inet_ntoa(_users[sockfd].get_address()->sin_addr));
+        if(timer) adjust_timer(timer);
+    }
+    else deal_timer(timer, sockfd);
+}
+
+void WebServer::epoll_ev(){
+    bool timeout = false;
+    bool stop_server = false;
+
+    while(!stop_server){
+        int num = epoll_wait(_efd, events, MAX_EVENT_NUM, -1);
+        if(num < 0 && errno != EINTR){
+            LOG_ERROR("%s", "epoll fail");
+            break;
+        }
+
+        for(int i = 0;i < num ;i++){
+            //epoll处理wait接收到的连接
+            int sockfd = _events[i].data.fd;
+
+            if(sockfd == _listenfd){
+                bool flag = deal_clinet_data();
+                if(!flag) continue;
+            }
+
+            else if(_events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)){
+                util_timer *timer = _user_timer[sockfd].timer;
+                deal_timer(timer, sockfd);
+            }
+            else if((sockfd == _pipe[0]) && (_events[i].events & EPOLLIN)){
+                bool flag = deal_with_signal(timeout, stop_server);
+                if(!flag) LOG_ERROR("%s", "deal_client_data fail");
+            }
+            else if(_events[i].events & EPOLLIN) deal_with_read(sockfd);
+            else if(_events[i].events & EPOLLOUT) deal_with_write(sockfd);
+        }
+        if(timeout){
+            _utils.timer_handler();
+            LOG_INFO("%s", "timer tick");
+            timeout = false;
+        }
+    }
 }

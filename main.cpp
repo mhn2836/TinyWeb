@@ -1,6 +1,5 @@
-#include<iostream>
-#include<string>
-#include<vector>
+#include "Config/Config.h"
+
 
 int main(int argc, char* argv[]){
     //数据库信息设定
@@ -11,17 +10,27 @@ int main(int argc, char* argv[]){
     //std::cout<<"mysql information set successful"<<std::endl;
 
     //初始化设定
-    //Config config;
-    //config.parse_arg(argc, argv);
+    config config;
+    config.parse_arg(argc, argv);
 
     //初始化webserver连接,设置详细细节
-    //WebServer server;
+    WebServer server;
+
+    server.init(config.port, user, passwd, dbname, config.log_write, config.sql_num, config.thread_num, config.close_log);
 
     //1、日志（同步、异步）
+    server.log_write();
 
-
+    server.sql_pool();
+    server.thread_pool();
+    server.trig_mode();
 
     std::cout<<"successful"<<std::endl;
+    
+    server.init_socket();
+    server.epoll_ev();
+
+    //
 
     return 0;
 }
