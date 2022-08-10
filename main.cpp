@@ -21,8 +21,8 @@ int main(int argc, char* argv[]){
     //1、日志（同步、异步）
     server.log_write();
 
-    server.sql_pool();
-    server.thread_pool();
+    server.SQL_pool();
+    server.THREAD_pool();
     server.trig_mode();
 
     std::cout<<"successful"<<std::endl;

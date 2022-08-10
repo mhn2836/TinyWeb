@@ -30,7 +30,7 @@ WebServer::~WebServer(){
 void WebServer::init(int port, std::string user, std::string passwd, std::string dbname, int log_write, int sql_num, int thread_num, int close_log){
     _port = port;
     _user = user;
-    _password = passwd;
+    _passwd = passwd;
     _dbname = dbname;
     _log_write = log_write;
     _OPT_LINGER = 1;
@@ -45,9 +45,9 @@ void WebServer::init(int port, std::string user, std::string passwd, std::string
 void WebServer::log_write(){
     if(!_close_log){
         if(_log_write == 1)
-            Log::get_instance()->init("./ServerLog", _close_log, 2000, 800000, 800); 
+            log::get_instance()->init("./ServerLog", _close_log, 2000, 800000, 800); 
         else
-            Log::get_instance()->init("./ServerLog", _close_log, 2000, 800000, 0); 
+            log::get_instance()->init("./ServerLog", _close_log, 2000, 800000, 0); 
     }
 }
 
@@ -57,15 +57,15 @@ void WebServer::trig_mode(){
     _conn_mode = 1;
 }
 
-void WebServer::sql_pool(){
+void WebServer::SQL_pool(){
     //
     _sql_pool = sql_pool::get_instance();
     _sql_pool -> init("localhost", _user, _passwd, _dbname, 3306, _sql_num, _close_log);
 
-    users -> initmysql_result(_sql_pool);
+    _users -> initmysql_result(_sql_pool);
 }
 
-void WebServer::thread_pool(){
+void WebServer::THREAD_pool(){
     //
     _pool = new thread_pool<http_conn>(_thread_num, 10000, _sql_pool);
 }
@@ -73,7 +73,7 @@ void WebServer::thread_pool(){
 void WebServer::init_socket(){
     //socket - bind - listen
     _listenfd = socket(PF_INET, SOCK_STREAM, 0);
-    std::assert(_listenfd >= 0);
+    assert(_listenfd >= 0);
 
     if(!_OPT_LINGER){
         struct linger temp = {0, 1};
@@ -103,13 +103,13 @@ void WebServer::init_socket(){
     //epoll注册内核事件表
     epoll_event _events[MAX_EVENT_NUM];
     _efd = epoll_create(5);
-    std::assert(_efd != -1);
+    assert(_efd != -1);
 
     _utils.add_fd(_efd, _listenfd, false, _listen_mode);
     http_conn::m_epollfd = _efd;
 
     ret = socketpair(PF_UNIX, SOCK_STREAM, 0, _pipe);
-    std::assert(ret != -1);
+    assert(ret != -1);
 
     _utils.set_non_blocking(_pipe[1]);
     _utils.add_fd(_efd, _pipe[0], false, 0);
@@ -140,14 +140,14 @@ void WebServer::timer(int cfd, struct sockaddr_in client_addr){
 }
 
 void WebServer::adjust_timer(util_timer *timer){
-    timer->expire = time(NULL) + TIMESLOT;
+    timer->_expire = time(NULL) + TIMESLOT;
     _utils._heap_timer.add_timer(timer);
 
     LOG_INFO("%s", "adjust timer once");
 }
 
 void WebServer::deal_timer(util_timer *timer, int sockfd){
-    timer->cb_func(&users_timer[sockfd]);
+    timer->cb_func(&_user_timer[sockfd]);
     if(timer){
         _utils._heap_timer.del_timer(timer);
     }
@@ -247,7 +247,7 @@ void WebServer::epoll_ev(){
     bool stop_server = false;
 
     while(!stop_server){
-        int num = epoll_wait(_efd, events, MAX_EVENT_NUM, -1);
+        int num = epoll_wait(_efd, _events, MAX_EVENT_NUM, -1);
         if(num < 0 && errno != EINTR){
             LOG_ERROR("%s", "epoll fail");
             break;

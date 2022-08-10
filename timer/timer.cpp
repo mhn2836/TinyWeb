@@ -19,7 +19,7 @@ heap_timer::heap_timer(int capacity):_capacity(capacity), _cur_size(0){
     if(_heap.empty()) throw std::exception();
 
     for(int i = 0;i < _capacity; i++){
-        _heap[i].emplace_back(nullptr);
+        _heap.emplace_back(nullptr);
     }
 }   
 
@@ -28,7 +28,7 @@ heap_timer::heap_timer(int cap, int size, std::vector<util_timer*> timer):_cur_s
 
     _heap.reserve(_capacity);
     for(int i = 0;i < _capacity; i++){
-        _heap[i].emplace_back(nullptr);
+        _heap.emplace_back(nullptr);
     }
 
     if(_cur_size){
@@ -94,7 +94,7 @@ void heap_timer::heap_adjust(int begin){
         if(son + 1 < _cur_size && _heap[son]->_expire > _heap[son + 1]->_expire)
         son++;
 
-        if(_heap[son]->_expire < _heap[father]->expire){
+        if(_heap[son]->_expire < _heap[father]->_expire){
             util_timer* temp = _heap[father];
             _heap[father] = _heap[son];
             _heap[son] = temp;
@@ -155,10 +155,11 @@ int util::set_non_blocking(int fd){
 }
 
 //内核时间表注册读时间，开启EPOLLONTSHOT和ET模式
-void util::add_fd(int efd, int fd, bool oneshot){
+void util::add_fd(int efd, int fd, bool oneshot,int trig_mode){
     epoll_event event;
     event.data.fd =fd;
-    event.events = EPOLLIN || EPOLLET || EPOLLRDHUP;
+    if(trig_mode == 1) event.events = EPOLLIN || EPOLLET || EPOLLRDHUP;
+    else event.events = EPOLLIN || EPOLLRDHUP;
 
     if(oneshot) event.events |= EPOLLONESHOT;
 

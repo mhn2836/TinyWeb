@@ -42,9 +42,9 @@ public:
     ~util_timer();
 
     time_t _expire;//超时时间
-    data _data;
+    data *_data;
 
-    void (*cb_func)(data);
+    void (*cb_func)(data*);
 
 };
 
@@ -89,7 +89,7 @@ public:
 
     int set_non_blocking(int fd);
 
-    void add_fd(int efd, int fd, bool one_shot);
+    void add_fd(int efd, int fd, bool one_shot, int trig_mode);
 
     static void sig_handler(int sig);
 
@@ -108,6 +108,6 @@ public:
 int *util::_pipefd = 0;
 int util::_efd = 0;
 
-void cb_func(data);
+void cb_func(data*);
 
 #endif

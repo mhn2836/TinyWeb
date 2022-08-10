@@ -24,11 +24,7 @@ const int TIMESLOT = 5;
 
 class WebServer{
 public:
-    WebServer(
-        int port, std::string user, std::string passwd, std::string dbname, int log_write,
-        int opt_linger, int trigger_mode, int sql_num, int thread_num, int close_log, 
-        int actor_model
-    );
+    WebServer();
     ~WebServer();
 
 public:
@@ -43,9 +39,9 @@ public:
     //触发模式
     void trig_mode();
     //数据库线程池
-    void sql_pool();
+    void SQL_pool();
     //线程池
-    void thread_pool();
+    void THREAD_pool();
     //epoll-event
     void epoll_ev();
 
@@ -77,7 +73,7 @@ private:
 
     sql_pool *_sql_pool;
     std::string _user;
-    std::string _password;
+    std::string _passwd;
     std::string _dbname;
     int _sql_num;
 

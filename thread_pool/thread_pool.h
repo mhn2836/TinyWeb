@@ -22,7 +22,7 @@
 template<class t>
 class thread_pool{
 public:
-    thread_pool(int thread_num = 8, int max_request, sql_pool *sql_pool);
+    thread_pool(int thread_num, int max_request, sql_pool *sql_pool);
     ~thread_pool();
     bool append(t *request);
     bool append(t *request, int state);

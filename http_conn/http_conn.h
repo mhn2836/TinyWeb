@@ -145,7 +145,7 @@ private:
 
     std::map<std::string, std::string> m_users;
     int m_TRIGMode;
-    int m_close_log;
+    int _close_log;
 
     char sql_user[100];
     char sql_passwd[100];

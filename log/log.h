@@ -59,8 +59,8 @@ private:
     block_queue<std::string> *_log_queue;
 };
 
-#define LOG_DEBUG(format, ...) if(!m_close_log) {log::get_instance()->write_log(0, format, ##__VA_ARGS__); log::get_instance()->flush();}
-#define LOG_INFO(format, ...) if(!m_close_log) {log::get_instance()->write_log(1, format, ##__VA_ARGS__); log::get_instance()->flush();}
-#define LOG_WARN(format, ...) if(!m_close_log) {log::get_instance()->write_log(2, format, ##__VA_ARGS__); log::get_instance()->flush();}
-#define LOG_ERROR(format, ...) if(!m_close_log) {log::get_instance()->write_log(3, format, ##__VA_ARGS__); log::get_instance()->flush();}
+#define LOG_DEBUG(format, ...) if(!_close_log) {log::get_instance()->write_log(0, format, ##__VA_ARGS__); log::get_instance()->flush();}
+#define LOG_INFO(format, ...) if(!_close_log) {log::get_instance()->write_log(1, format, ##__VA_ARGS__); log::get_instance()->flush();}
+#define LOG_WARN(format, ...) if(!_close_log) {log::get_instance()->write_log(2, format, ##__VA_ARGS__); log::get_instance()->flush();}
+#define LOG_ERROR(format, ...) if(!_close_log) {log::get_instance()->write_log(3, format, ##__VA_ARGS__); log::get_instance()->flush();}
 #endif
