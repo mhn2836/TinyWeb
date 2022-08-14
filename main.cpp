@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     WebServer server;
 
     server.init(config.port, user, passwd, dbname, config.log_write, config.sql_num, config.thread_num, config.close_log);
-    std::cout<<"successful"<<std::endl;
+    
     //1、日志（同步、异步）
     server.log_write();
 
@@ -28,6 +28,7 @@ int main(int argc, char* argv[]){
     
     
     server.init_socket();
+    std::cout<<"init success"<<std::endl;
     server.epoll_ev();
 
     //

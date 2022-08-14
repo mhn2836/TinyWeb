@@ -7,8 +7,7 @@ sql_pool *sql_pool::get_instance(){
 
 void sql_pool::init(std::string url, std::string user, std::string password, std::string dbname,
 int port, int max_conn, int close_log){
-    _url = url; _user = user;_password = password;
-    _dbname = dbname;close_log = close_log;
+    _url = url; _user = user;_password = password;_dbname = dbname;_port = port;close_log = close_log;
 
     for(int i = 0; i < max_conn; i++){
         MYSQL *conn = NULL;

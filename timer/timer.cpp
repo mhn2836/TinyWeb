@@ -159,8 +159,8 @@ int util::set_non_blocking(int fd){
 void util::add_fd(int efd, int fd, bool oneshot,int trig_mode){
     epoll_event event;
     event.data.fd =fd;
-    if(trig_mode == 1) event.events = EPOLLIN || EPOLLET || EPOLLRDHUP;
-    else event.events = EPOLLIN || EPOLLRDHUP;
+    if(trig_mode == 1) event.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
+    else event.events = EPOLLIN | EPOLLRDHUP;
 
     if(oneshot) event.events |= EPOLLONESHOT;
 

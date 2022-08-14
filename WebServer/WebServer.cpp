@@ -4,8 +4,7 @@ WebServer::WebServer(){
     //http连接数组初始化
     _users = new http_conn[MAX_FD];
 
-    int _listenfd;
-    char server_path[100];
+    char server_path[200];
     getcwd(server_path, sizeof(server_path));
     char *root = "/root";
     _root = (char *)malloc(strlen(server_path) + strlen(root) + 1);
@@ -33,7 +32,7 @@ void WebServer::init(int port, std::string user, std::string passwd, std::string
     _passwd = passwd;
     _dbname = dbname;
     _log_write = log_write;
-    _OPT_LINGER = 1;
+    _OPT_LINGER = 0;
     _trig_mode = 1;
 
     _sql_num = sql_num;
@@ -95,10 +94,11 @@ void WebServer::init_socket(){
     setsockopt(_listenfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
     ret = bind(_listenfd, (struct sockaddr *)&address, sizeof(address));
     assert(ret >= 0);
+    //std::cout<<"bind success"<<std::endl;
     ret = listen(_listenfd, 5);
     assert(ret >= 0);
 
-    _utils.init(TIMESLOT);
+    _utils.init(TIMESLOT * 2);
 
     //epoll注册内核事件表
     epoll_event _events[MAX_EVENT_NUM];
@@ -118,7 +118,7 @@ void WebServer::init_socket(){
     _utils.add_sig(SIGALRM, _utils.sig_handler, false);
     _utils.add_sig(SIGTERM, _utils.sig_handler, false);
 
-    alarm(TIMESLOT);
+    //alarm(TIMESLOT);
 
     util::_pipefd = _pipe;
     util::_efd = _efd;
@@ -132,10 +132,12 @@ void WebServer::timer(int cfd, struct sockaddr_in client_addr){
     _user_timer[cfd].addr = client_addr;
     _user_timer[cfd].sockfd = cfd;
 
-    util_timer *timer = new util_timer(TIMESLOT);
+    util_timer *timer = new util_timer(2*TIMESLOT);
     timer->_data = &_user_timer[cfd];
     timer->cb_func = cb_func;
     _user_timer[cfd].timer = timer;
+
+    if(_utils._heap_timer.empty()) alarm(TIMESLOT * 2);
     _utils._heap_timer.add_timer(timer);
 }
 
@@ -198,7 +200,7 @@ bool WebServer::deal_with_signal(bool &timeout, bool &stop_server){
     char signals[1024];
     ret = recv(_pipe[0], signals, sizeof(signals), 0);
 
-    if(ret = -1) return false;
+    if(ret == -1) return false;
     else if(!ret) return false;
     else {
         for(int i = 0; i < ret; i++){
@@ -258,6 +260,7 @@ void WebServer::epoll_ev(){
             int sockfd = _events[i].data.fd;
 
             if(sockfd == _listenfd){
+                std::cout<<i<<std::endl;
                 bool flag = deal_clinet_data();
                 if(!flag) continue;
             }
