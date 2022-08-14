@@ -10,33 +10,26 @@ util_timer::~util_timer(){}
 
 
 //heap_timer
-heap_timer::heap_timer():_capacity(10000), _cur_size(0){
-    _heap = new util_timer*[_capacity];
-    if(!_heap) throw std::exception();
-
-    for(int i = 0;i < _capacity; i++){
-        _heap[i] = nullptr;
-    }
+heap_timer::heap_timer(){
+    _heap.reserve(1);
 }
 
 heap_timer::heap_timer(int capacity):_capacity(capacity), _cur_size(0){
-    
-    _heap = new util_timer*[capacity];
-    if(!_heap) throw std::exception();
+    _heap.reserve(_capacity);
+
+    if(_heap.empty()) throw std::exception();
 
     for(int i = 0;i < _capacity; i++){
-        _heap[i] = nullptr;
+        _heap.emplace_back(nullptr);
     }
 }   
 
-heap_timer::heap_timer(int cap, int size, util_timer** timer):_cur_size(size), _capacity(cap){
+heap_timer::heap_timer(int cap, int size, std::vector<util_timer*> timer):_cur_size(size), _capacity(cap){
     if(_capacity < _cur_size) throw std::exception();
 
-    _heap = new util_timer*[cap];
-    if(!_heap) throw std::exception();
-
+    _heap.reserve(_capacity);
     for(int i = 0;i < _capacity; i++){
-        _heap[i] = nullptr;
+        _heap.emplace_back(nullptr);
     }
 
     if(_cur_size){
@@ -54,7 +47,7 @@ heap_timer::~heap_timer(){
         delete _heap[i];
     }
 
-    delete[] _heap;
+    _heap.clear();
 }
 
 void heap_timer::add_timer(util_timer *timer){
@@ -124,19 +117,13 @@ bool heap_timer::empty(){
 }
 
 void heap_timer::resize(){
-    util_timer** temp = new util_timer*[2*_capacity];
+    _heap.reserve(2 * _capacity);
 
-    for(int i = 0;i < 2*_capacity; i++){
-        _heap[i] = nullptr;
+    for(int i = 0;i < _capacity; i++){
+        _heap.emplace_back(nullptr);
     }
-    if(!temp) throw std::exception();
+
     _capacity = 2 * _capacity;
-
-    for(int i = 0; i < _cur_size; i++){
-        temp[i] = _heap[i];
-    }
-    delete[] _heap;
-    _heap = temp;
 }
 
 void heap_timer::tick(){

@@ -125,7 +125,6 @@ void WebServer::init_socket(){
 }
 
 void WebServer::timer(int cfd, struct sockaddr_in client_addr){
-    util::_efd = _efd;
     _users[cfd].init(cfd, client_addr, _root, _conn_mode, _close_log, 
         _user, _passwd, _dbname);
 
@@ -142,8 +141,9 @@ void WebServer::timer(int cfd, struct sockaddr_in client_addr){
 }
 
 void WebServer::adjust_timer(util_timer *timer){
-    timer->_expire = time(NULL) + TIMESLOT;
-    _utils._heap_timer.add_timer(timer);
+    timer->_expire = time(NULL) + 2*TIMESLOT;
+    //_utils._heap_timer.add_timer(timer);
+    _utils._heap_timer.heap_adjust(0);
 
     LOG_INFO("%s", "adjust timer once");
 }
@@ -212,8 +212,6 @@ bool WebServer::deal_with_signal(bool &timeout, bool &stop_server){
             case SIGTERM:{
                 stop_server = true;;break;
             }
-            default:
-                break;
             }
         }
     }
@@ -229,8 +227,9 @@ void WebServer::deal_with_read(int sockfd){
         _pool->append(_users + sockfd);
 
         if(timer) adjust_timer(timer);
-        else deal_timer(timer, sockfd);
+        
     }
+    else deal_timer(timer, sockfd);
 
 }
 

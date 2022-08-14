@@ -52,13 +52,14 @@ class heap_timer{
 public:
     heap_timer();
     heap_timer(int cap);
-    heap_timer(int cap, int size, std::vector<util_timer*> timer);
+    heap_timer(int cap, int size, util_timer ** timer);
     ~heap_timer();
 
 private:
     data _data;
 
-    std::vector<util_timer*> _heap;
+    //std::vector<util_timer*> _heap;
+    util_timer **_heap;
     int _capacity;
     int _cur_size;
 
