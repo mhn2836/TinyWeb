@@ -26,7 +26,7 @@
 #include "../locker/locker.h"
 #include "../log/log.h"
 #include "../thread_pool/sql_pool.h"
-#include "../thread_pool/thread_pool.h"
+//#include "../thread_pool/thread_pool.h"
 #include "../timer/timer.h"
 
 class http_conn

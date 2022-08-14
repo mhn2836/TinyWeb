@@ -41,7 +41,7 @@ public:
     //数据库线程池
     void SQL_pool();
     //线程池
-    void THREAD_pool();
+    void ThreadPool();
     //epoll-event
     void epoll_ev();
 

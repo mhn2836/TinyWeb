@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "../http_conn/http_conn.h"
 
 //util_timer
 util_timer::util_timer(int delay):_expire(time(NULL) + delay){
@@ -202,8 +203,12 @@ void util::show_error(int cfd, const char *info){
     close(cfd);
 }
 
+int *util::_pipefd = 0;
+int util::_efd = 0;
+
 void cb_func(data *user_data){
     epoll_ctl(util::_efd, EPOLL_CTL_DEL, user_data->sockfd, 0);
     assert(user_data);
     close(user_data->sockfd);
     http_conn::m_user_count--;
+    }

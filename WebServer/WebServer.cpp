@@ -65,7 +65,7 @@ void WebServer::SQL_pool(){
     _users -> initmysql_result(_sql_pool);
 }
 
-void WebServer::THREAD_pool(){
+void WebServer::ThreadPool(){
     //
     _pool = new thread_pool<http_conn>(_thread_num, 10000, _sql_pool);
 }
@@ -114,7 +114,7 @@ void WebServer::init_socket(){
     _utils.set_non_blocking(_pipe[1]);
     _utils.add_fd(_efd, _pipe[0], false, 0);
 
-    _utils.add_sig(SIGPIPE, SIG_IGN);
+    _utils.add_sig(SIGPIPE, SIG_IGN, true);
     _utils.add_sig(SIGALRM, _utils.sig_handler, false);
     _utils.add_sig(SIGTERM, _utils.sig_handler, false);
 

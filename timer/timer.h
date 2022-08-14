@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef _TIMER_H
+#define _TIMER_H
 
 #include<iostream>
 #include<string>
@@ -23,7 +23,7 @@
 #include<sys/epoll.h>
 
 #include "../log/log.h"
-#include "../http_conn/http_conn.h"
+
 
 class util_timer;
 const int buf_size = 64;
@@ -93,7 +93,7 @@ public:
 
     static void sig_handler(int sig);
 
-    void add_sig(int sig, void(handler)(int), bool restart = true);
+    void add_sig(int sig, void(handler)(int), bool restart);
 
     void timer_handler();
 
@@ -105,8 +105,7 @@ public:
     int _timeslot;
 };
 
-int *util::_pipefd = 0;
-int util::_efd = 0;
+
 
 void cb_func(data*);
 

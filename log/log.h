@@ -36,8 +36,8 @@ public:
         return arg;
     }
 
-    bool init(const char* filename, int close_log, int log_buffer = 8192,
-    int split_lines = 5000000, int max_queue = 0);
+    bool init(const char* filename, int close_log, int log_buffer,
+    int split_lines, int max_queue);
 
     void write_log(int level, const char *format, ...);
 
