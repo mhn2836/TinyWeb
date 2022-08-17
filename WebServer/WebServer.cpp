@@ -143,7 +143,8 @@ void WebServer::timer(int cfd, struct sockaddr_in client_addr){
 void WebServer::adjust_timer(util_timer *timer){
     timer->_expire = time(NULL) + 2*TIMESLOT;
     //_utils._heap_timer.add_timer(timer);
-    _utils._heap_timer.heap_adjust(0);
+    int fd = _utils._heap_timer.get_index(timer->_data->sockfd);
+    _utils._heap_timer.heap_adjust(fd);
 
     LOG_INFO("%s", "adjust timer once");
 }
@@ -259,7 +260,7 @@ void WebServer::epoll_ev(){
             int sockfd = _events[i].data.fd;
 
             if(sockfd == _listenfd){
-                std::cout<<i<<std::endl;
+                //std::cout<<i<<std::endl;
                 bool flag = deal_clinet_data();
                 if(!flag) continue;
             }

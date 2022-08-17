@@ -69,9 +69,11 @@ void heap_timer::add_timer(util_timer *timer){
             if(_heap[father]->_expire <= timer->_expire) break;
 
             _heap[temp] = _heap[father];
+            _mp[_heap[temp]->_data->sockfd] = temp;
         }
 
         _heap[temp] = timer;
+        _mp[timer->_data->sockfd] = temp;
     }
 }
 
@@ -107,11 +109,14 @@ void heap_timer::heap_adjust(int begin){
             _heap[father] = _heap[son];
             _heap[son] = temp;
 
+            _mp[_heap[father]->_data->sockfd] = father;
+
             father = son;
             son = father * 2 + 1;
         }
         else break;
     }
+    _mp[_heap[father]->_data->sockfd] = father;
 }
 
 util_timer* heap_timer::top(){
@@ -127,7 +132,7 @@ void heap_timer::resize(){
     util_timer** temp = new util_timer*[2*_capacity];
 
     for(int i = 0;i < 2*_capacity; i++){
-        _heap[i] = nullptr;
+        temp[i] = nullptr;
     }
     if(!temp) throw std::exception();
     _capacity = 2 * _capacity;
@@ -152,6 +157,10 @@ void heap_timer::tick(){
         pop_timer();
         temp = _heap[0];
     }
+}
+
+int heap_timer::get_index(int sockfd){
+    return _mp[sockfd];
 }
 
 //util

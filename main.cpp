@@ -7,9 +7,7 @@ int main(int argc, char* argv[]){
     std::string passwd = "root";
     std::string dbname = "mydb";
 
-    //std::cout<<"mysql information set successful"<<std::endl;
-
-    //初始化设定
+    //初始化参数
     config config;
     config.parse_arg(argc, argv);
 
@@ -20,15 +18,19 @@ int main(int argc, char* argv[]){
     
     //1、日志（同步、异步）
     server.log_write();
-
+    //2、初始化数据库池
     server.SQL_pool();
-    server.ThreadPool();
-    server.trig_mode();
+    //std::cout<<"mysql information set successful"<<std::endl;
 
-    
-    
+    //3、初始化线程池
+    server.ThreadPool();
+    //4、设定触发模式
+    server.trig_mode();
+    //5、初始化连接
     server.init_socket();
     std::cout<<"init success"<<std::endl;
+
+    //6、epoll事件循环
     server.epoll_ev();
 
     //

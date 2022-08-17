@@ -39,7 +39,9 @@ private:
 
 private:
     static void *work_func(void *arg){
-        return arg;
+        thread_pool *pool = (thread_pool*)arg;
+        pool->run();
+        return pool;
     }
     void run();
 

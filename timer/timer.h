@@ -7,6 +7,7 @@
 #include<exception>
 #include<list>
 #include<vector>
+#include<unordered_map>
 
 #include<errno.h>
 #include<fcntl.h>
@@ -26,14 +27,14 @@
 
 
 class util_timer;
-const int buf_size = 64;
+//const int buf_size = 64;
 
 struct data
 {
     sockaddr_in addr;
     util_timer *timer;
     int sockfd;
-    char buffer[buf_size];
+    //char buffer[buf_size];
 };
 
 class util_timer{
@@ -63,6 +64,7 @@ private:
     int _capacity;
     int _cur_size;
 
+    std::unordered_map<int, int> _mp;
 public:
     void add_timer(util_timer *timer);
     void del_timer(util_timer *timer);
@@ -75,6 +77,7 @@ public:
 
     void resize();
     void tick();
+    int get_index(int sockfd);
 };
 
 class util{
