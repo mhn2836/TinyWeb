@@ -7,7 +7,7 @@ Environment:
   
   default mysql info: user = root, passwd = root, dbname = mydb
   
-  
+ ********************************************************************************
   
 Init:
   cd TinyWeb
@@ -18,7 +18,10 @@ Init:
   
   sudo ./server 9006
   
-Presure BenchMark
+ ********************************************************************************
+  
+Presure BenchMark:
+
   sudo ./server 9006 -c 1
   
   cd ./test_presure/webbench-1.5
