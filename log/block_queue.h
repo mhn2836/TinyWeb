@@ -53,14 +53,16 @@ public:
 
     bool empty(){
         _mutex.mutex_lock();
+        int qsize = _queue_size;
         _mutex.mutex_unlock();
-        return _queue_size == 0;
+        return qsize == 0;
     }
 
     bool full(){
         _mutex.mutex_lock();
+        int qsize = _queue_size;
         _mutex.mutex_unlock();
-        return _max_size <= _queue_size;
+        return _max_size <= qsize;
     }
 
     t& front(){
@@ -69,9 +71,10 @@ public:
             _mutex.mutex_unlock();
             throw std::exception();
         }
+        t temp = _array[_front];
         _mutex.mutex_unlock();
 
-        return _array[_front];
+        return temp;
     }
 
     t& back(){
@@ -80,9 +83,10 @@ public:
             _mutex.mutex_unlock();
             throw std::exception();
         }
+        t temp = _array[_back];
         _mutex.mutex_unlock();
 
-        return _array[_back];
+        return temp;
     }
 
     int size(){

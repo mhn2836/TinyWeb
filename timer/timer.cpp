@@ -1,5 +1,6 @@
 #include "timer.h"
 #include "../http_conn/http_conn.h"
+#define MAX_FD 64
 
 //util_timer
 util_timer::util_timer(int delay):_expire(time(NULL) + delay){
@@ -10,7 +11,7 @@ util_timer::~util_timer(){}
 
 
 //heap_timer
-heap_timer::heap_timer():_capacity(10000), _cur_size(0){
+heap_timer::heap_timer():_capacity(MAX_FD), _cur_size(0){
     _heap = new util_timer*[_capacity];
     if(!_heap) throw std::exception();
 
@@ -88,6 +89,8 @@ void heap_timer::del_timer(util_timer *timer){
 void heap_timer::pop_timer(){
     if(_cur_size){
         if(_heap[0]){
+            _mp.erase(_heap[0]->_data->sockfd);
+
             delete _heap[0];
             _heap[0] = _heap[--_cur_size];
             //更新小顶堆
